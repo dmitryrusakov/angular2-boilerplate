@@ -4,9 +4,7 @@ import {Router} from '@angular/router';
 @Component({
   moduleId: module.id,
   selector: 'index',
-  templateUrl: 'index.component.html',
-  directives: [],
-  providers: []
+  templateUrl: 'index.component.html'
 })
 
 export class IndexComponent {

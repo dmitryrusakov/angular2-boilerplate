@@ -1,3 +1,5 @@
+'use strict';
+
 const gulp = require('gulp'),
       configModule = require('./tools/gulp.config.js'),
       config = configModule(),
@@ -6,6 +8,9 @@ const gulp = require('gulp'),
       del = require('del'),
       notify = require("gulp-notify"),
       browserSync = require('browser-sync').create(),
+      fs = require('fs'),
+      url = require('url'),
+      template = require('gulp-template'),
 
       tslint = require('gulp-tslint'),
       typescript = require('gulp-typescript'),
@@ -115,6 +120,13 @@ gulp.task('uglify', () => {
 });
 
 
+/* Template */
+gulp.task('template', () =>
+  gulp.src(`${config.dist}/app/**/*.js`)
+    .pipe(template(config.endpoints[config.envStr]))
+    .pipe(gulp.dest(`${config.dist}/app`)));
+
+
 /* Update config environement */
 gulp.task('setStaging', () => configModule.setStaging());
 gulp.task('setProduction', () => configModule.setProduction());
@@ -125,13 +137,23 @@ gulp.task('notify', () => {gulp.src('').pipe(notify('Project compiled'));});
 
 
 /* Serve using default system browser */
-gulp.task('serve',  [] , function( cb ){
+gulp.task('serve', [], function(cb){
   browserSync.init({
-    open:  true,
+    open: true,
+    browser: 'google chrome',
+    port: config.server.port,
     server: {
-      baseDir: config.dist
-    },
-    port: config.server.port
+      baseDir: config.dist,
+      middleware: function(req, res, next) {
+        let fileExists, fileName = url.parse(req.url);
+        fileName = fileName.href.split(fileName.search).join("");
+        fileExists = fs.existsSync(config.dist + fileName);
+        if (!fileExists && fileName.indexOf("browser-sync-client") < 0) {
+          req.url = `/${config.mainFile}`;
+        }
+        return next();
+      }
+    }
   });
 });
 
@@ -147,6 +169,7 @@ gulp.task('compile', (callback) => {
     'clean',
     'typescript',
     'uglify',
+    'template',
     'scss',
     ['copy:assets', 'copy:ng2'],
     'uncache:index',
@@ -164,13 +187,11 @@ gulp.task('watch', () => {
   });
 
   gulp.watch(`${config.src}/**/*`, function() {
-    gulp.run('compile', function() {
-      // browserSync.reload();
-      console.log('watched');
-    });
+    gulp.run('compile');
   })
 
 });
+
 
 gulp.task('dev', ['compile']);
 gulp.task('dev.watch', ['watch']);
