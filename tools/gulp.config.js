@@ -30,7 +30,7 @@ const config = {
     'node_modules/core-js/**/*',
     'node_modules/rxjs/**/*',
     'node_modules/angular2-in-memory-web-api/**/*',
-    'node_modules/ng2-translate/**/*'
+    // 'node_modules/ng2-translate/**/*'
   ],
   systemjsConfigPath: 'systemjs.config.js',
 
