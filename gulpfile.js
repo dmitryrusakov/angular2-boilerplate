@@ -188,7 +188,7 @@ gulp.task('watch', () => {
 
   gulp.watch(`${config.src}/**/*`, function() {
     gulp.run('compile');
-  })
+  });
 
 });
 
