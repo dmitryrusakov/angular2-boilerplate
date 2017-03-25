@@ -13,6 +13,7 @@ const gulp = require('gulp'),
       template = require('gulp-template'),
 
       tslint = require('gulp-tslint'),
+      tsrules = require('./tslint.json').rules,
       typescript = require('gulp-typescript'),
       tscConfig = require('./tsconfig.json'),
       uglify = require('gulp-uglify'),
@@ -94,7 +95,7 @@ gulp.task('uncache:index', () => {
 /* TypeScript lint */
 gulp.task('tslint', () =>
   gulp.src('src/app/**/*.ts')
-    .pipe(tslint())
+    .pipe(tslint(tsrules))
     .pipe(tslint.report('verbose')));
 
 
@@ -165,7 +166,7 @@ gulp.task('reload', function() {browserSync.reload();});
 /* Compile src to dist depends on env */
 gulp.task('compile', (callback) => {
   return runSequence(
-    /*'tslint',*/
+    // 'tslint',
     'clean',
     'typescript',
     'uglify',
@@ -182,12 +183,17 @@ gulp.task('compile', (callback) => {
 /* Watch changes and serve */
 gulp.task('watch', () => {
 
-  gulp.run('compile', () => {
+  gulp.run('compile', (err) => {
+    console.log('err:');
+    if (err) {
+      console.log(`\nError occurred while compile:\n`);
+      console.log(err);
+      return;
+    }
     gulp.run('serve');
-  });
-
-  gulp.watch(`${config.src}/**/*`, function() {
-    gulp.run('compile');
+    gulp.watch(`${config.src}/**/*`, function() {
+      gulp.run('compile');
+    });
   });
 
 });
